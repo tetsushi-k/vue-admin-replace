@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>受注一覧（Legacy jQuery）</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+  <div id="login-view" class="container">
+    <h1>ログイン（Legacy）</h1>
+    <form id="login-form">
+      <label>メール <input type="email" id="email" value="admin@example.com" required></label>
+      <label>パスワード <input type="password" id="password" value="password123" required></label>
+      <button type="submit">ログイン</button>
+    </form>
+    <p id="login-error" class="error"></p>
+  </div>
+
+  <div id="orders-view" class="container hidden">
+    <header>
+      <h1>受注一覧（Legacy jQuery）</h1>
+      <button id="logout-btn" type="button">ログアウト</button>
+    </header>
+
+    <form id="filter-form">
+      <label>
+        ステータス
+        <select id="status">
+          <option value="">すべて</option>
+          <option value="pending">pending</option>
+          <option value="paid">paid</option>
+          <option value="shipped">shipped</option>
+          <option value="cancelled">cancelled</option>
+        </select>
+      </label>
+      <label>
+        開始日
+        <input type="date" id="date_from">
+      </label>
+      <label>
+        終了日
+        <input type="date" id="date_to">
+      </label>
+      <button type="submit">検索（ページリロード）</button>
+    </form>
+
+    <p id="loading" class="hidden">読み込み中...</p>
+    <p id="error" class="error hidden"></p>
+
+    <table id="orders-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>顧客名</th>
+          <th>金額</th>
+          <th>ステータス</th>
+          <th>注文日時</th>
+        </tr>
+      </thead>
+      <tbody id="orders-body"></tbody>
+    </table>
+
+    <div id="pagination"></div>
+  </div>
+
+  <script>
+    window.API_BASE_URL = 'http://localhost:8000';
+  </script>
+  <script src="js/app.js"></script>
+</body>
+</html>

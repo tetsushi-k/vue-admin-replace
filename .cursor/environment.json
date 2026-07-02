@@ -1,0 +1,5 @@
+{
+  "install": "make setup",
+  "start": "make up",
+  "test": "make test"
+}
