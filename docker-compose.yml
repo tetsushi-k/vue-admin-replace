@@ -1,21 +1,15 @@
 services:
   app:
-    image: laravelsail/php83-composer:latest
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     volumes:
       - ./src:/var/www/html
     working_dir: /var/www/html
     environment:
-      APP_ENV: local
-      APP_DEBUG: "true"
       APP_URL: http://localhost:8000
-      DB_CONNECTION: mysql
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_DATABASE: vue_admin
-      DB_USERNAME: vue_admin
-      DB_PASSWORD: secret
     depends_on:
       db:
         condition: service_healthy

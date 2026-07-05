@@ -5,26 +5,34 @@ namespace Database\Seeders;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password123'),
-            'role' => 'admin',
-        ]);
+        $admin = User::query()->updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'password' => 'password123',
+                'role' => 'admin',
+            ],
+        );
 
-        $staff = User::factory()->create([
-            'name' => 'Staff User',
-            'email' => 'staff@example.com',
-            'password' => Hash::make('password123'),
-            'role' => 'staff',
-        ]);
+        User::query()->updateOrCreate(
+            ['email' => 'staff@example.com'],
+            [
+                'name' => 'Staff User',
+                'password' => 'password123',
+                'role' => 'staff',
+            ],
+        );
 
+        if (Order::query()->exists()) {
+            return;
+        }
+
+        $staff = User::query()->where('email', 'staff@example.com')->firstOrFail();
         $statuses = ['pending', 'paid', 'shipped', 'cancelled'];
         $users = [$admin, $staff];
 

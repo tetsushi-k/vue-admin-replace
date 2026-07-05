@@ -1,10 +1,11 @@
-.PHONY: help setup up down restart ps logs test test-api test-vue bash
+.PHONY: help setup fresh up-db up down restart ps logs test test-api test-vue bash
 
 COMPOSE = docker compose
 
 help:
 	@echo "Available targets:"
 	@echo "  make setup     - Build, install deps, migrate and seed"
+	@echo "  make fresh     - Reset DB and re-seed demo data"
 	@echo "  make up        - Start all services"
 	@echo "  make down      - Stop all services"
 	@echo "  make restart   - Restart all services"
@@ -15,13 +16,19 @@ help:
 	@echo "  make test-vue  - Run Vue Vitest tests"
 	@echo "  make bash      - Open shell in app container"
 
-setup: up
-	$(COMPOSE) exec -T app composer install --no-interaction
-	$(COMPOSE) exec -T app cp -n .env.example .env || true
-	$(COMPOSE) exec -T app php artisan key:generate --force
-	$(COMPOSE) exec -T app php artisan migrate --force
-	$(COMPOSE) exec -T app php artisan db:seed --force
+setup: up-db
+	$(COMPOSE) run --rm -T app composer install --no-interaction
+	$(COMPOSE) run --rm -T app cp -n .env.example .env || true
+	$(COMPOSE) run --rm -T app php artisan key:generate --force
+	$(COMPOSE) run --rm -T app php artisan migrate --force --seed
+	$(COMPOSE) up -d
 	$(COMPOSE) exec -T frontend npm install
+
+fresh:
+	$(COMPOSE) exec -T app php artisan migrate:fresh --seed --force
+
+up-db:
+	$(COMPOSE) up -d db
 
 up:
 	$(COMPOSE) up -d

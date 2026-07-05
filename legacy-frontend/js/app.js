@@ -128,6 +128,9 @@
       url: API_BASE_URL + '/api/login',
       method: 'POST',
       contentType: 'application/json',
+      headers: {
+        Accept: 'application/json'
+      },
       data: JSON.stringify({
         email: $('#email').val(),
         password: $('#password').val()
