@@ -54,10 +54,25 @@ EC 受注管理画面は長年 jQuery で運用されてきた。UI 改修のた
 - [x] jQuery 版はフィルタでフルリロード、Vue 版はリロードなし
 - [x] admin ロールのみアクセス可能
 
-### Phase 2（gateway 統一）
+### Phase 2
+
+#### gateway 統一
 
 - [x] `http://localhost` から Vue / legacy / API に到達できる
 - [x] `/orders`（Vue）と `/legacy/customers.html`（legacy）を相互遷移できる
 - [x] `admin_token` で legacy ↔ Vue のログイン状態が共有される
 - [x] legacy orders（Before 比較）は維持、customers は legacy のみ
-- [x] `make test` 成功、aidlc-docs / README と実装が一致
+
+#### 受注詳細モーダル
+
+- **対象**: `frontend-vue/` のみ。`legacy-frontend/` は変更しない
+- **UI**: Element Plus `el-dialog`
+- **データ源**: 一覧 API（`GET /api/admin/orders`）の行データをそのまま使う。詳細 API（`GET /api/admin/orders/{id}`）は追加しない
+- **表示項目**: id, customer_name, amount, status, ordered_at（一覧と同じ）
+
+- [x] 受注一覧テーブルの行クリックで詳細モーダルが開く
+- [x] モーダルを閉じられる
+- [x] フィルタ・ページネーションの既存動作は維持
+- [x] Vitest で行クリック・表示項目を検証
+- [x] `make test` が成功する
+- [x] aidlc-docs / README と実装が一致
