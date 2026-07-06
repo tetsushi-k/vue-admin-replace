@@ -2,7 +2,7 @@
 
 https://github.com/tetsushi-k/vue-admin-replace
 
-EC 受注管理画面の **jQuery → Vue 3 段階リプレイス** を題材にしたポートフォリオです。同一 Laravel API に対して legacy（jQuery）と Vue 3 を並行稼働させ、Before / After の差分を比較できます。
+EC 受注管理画面の **jQuery → Vue 3 段階リプレイス** を題材にしたポートフォリオです。同一 Laravel API に対して legacy（jQuery）と Vue 3 を並行稼働させ、Before / After の差分を比較できます。Phase 2 では gateway nginx により **本番想定の 1 ドメイン運用** を開発環境でも再現します。
 
 ## 1. 概要
 
@@ -10,7 +10,9 @@ EC 受注管理画面の **jQuery → Vue 3 段階リプレイス** を題材に
 
 - **Before**: `legacy-frontend/` — フィルタ変更でページ全体をリロード、DOM を文字列連結で生成
 - **After**: `frontend-vue/` — Pinia で状態管理、フィルタ変更は API 再取得のみ（リロードなし）
+- **未移行**: `legacy-frontend/customers.html` — 顧客一覧は legacy のみ（段階移行デモ用）
 - **API**: Laravel 11+ Sanctum 認証、admin ロールのみ受注一覧にアクセス可能
+- **Gateway**: `http://localhost` から Vue / legacy / API へパス振り分け
 
 ## 2. 使用技術
 
@@ -19,52 +21,56 @@ EC 受注管理画面の **jQuery → Vue 3 段階リプレイス** を題材に
 | API | Laravel 11+, Sanctum, MySQL 8.0 |
 | Legacy UI | HTML, jQuery, nginx |
 | Vue UI | Vue 3, Vite, TypeScript, Element Plus, Pinia, Vue Router |
+| Gateway | nginx（パス振り分け + Vite HMR proxy） |
 | インフラ | Docker Compose, Makefile |
 | テスト | PHPUnit, Vitest |
 
 ## 3. アーキテクチャ図
 
-legacy（jQuery）と vue（Vue 3）は **同一 API** を Bearer トークンで呼び出し、フロントのみ実装方式が異なります。
+legacy（jQuery）と vue（Vue 3）は **同一 API** を Bearer トークン（`admin_token`）で呼び出し、gateway 経由では同一ドメインで共存します。
 
 ### 構成図
 
 ```mermaid
-flowchart LR
-  subgraph clients [Clients]
-    L[legacy-frontend :8081]
-    V[frontend-vue :5173]
-  end
+flowchart TB
+  U[Browser] --> G[gateway nginx :80]
 
-  subgraph backend [Backend]
-    A[Laravel API :8000]
-    D[(MySQL 8.0)]
-  end
+  G -->|"/api/*"| A[Laravel API :8000]
+  G -->|"/legacy/*"| L[legacy nginx :8081]
+  G -->|"/" Vue routes| V[frontend-vue :5173]
 
-  L -->|Bearer Token| A
-  V -->|Bearer Token| A
-  A --> D
+  L --> LF[legacy-frontend]
+  V --> VF[Vue SPA]
+  A --> D[(MySQL 8.0)]
 ```
 
-### シーケンス図（フィルタ変更時）
+### ルーティング
+
+| パス | 行き先 | 内容 |
+|------|--------|------|
+| `/api/*` | Laravel | 認証・受注 API |
+| `/legacy/*` | legacy nginx | 未移行画面（orders / customers） |
+| `/`, `/orders`, `/login` | Vite dev server | Vue SPA |
+
+### シーケンス図（段階移行デモ）
 
 ```mermaid
 sequenceDiagram
   participant U as User
-  participant L as legacy jQuery
-  participant V as Vue 3 SPA
-  participant API as Laravel API
+  participant G as gateway :80
+  participant V as Vue /orders
+  participant L as legacy /legacy/customers
+  participant API as Laravel /api
 
-  Note over L,V: legacy: フィルタ変更 → フルリロード / vue: リロードなし
-
-  U->>L: ステータス変更して検索
-  L->>L: window.location 更新（ページリロード）
-  L->>API: GET /api/admin/orders?status=paid
-  API-->>L: JSON pagination
-
-  U->>V: ステータス変更して検索
-  V->>API: GET /api/admin/orders?status=paid
-  API-->>V: JSON pagination
-  V->>V: store 更新・テーブル再描画（リロードなし）
+  U->>G: http://localhost/orders
+  G->>V: proxy
+  U->>V: ログイン（admin_token 保存）
+  U->>G: 顧客一覧（Legacy）リンク
+  G->>L: /legacy/customers.html
+  Note over U,L: 同一 localhost オリジン・同一 admin_token
+  L->>L: 再ログイン不要で表示
+  U->>G: 受注一覧（Vue）リンク
+  G->>V: /orders
 ```
 
 ## 4. 設計上の工夫
@@ -82,11 +88,18 @@ sequenceDiagram
 - **リロードなし**: フィルタ変更 → `applyFilters()` → API 再取得
 - **UX**: `v-loading`、0 件時の `el-empty`、ステータスバッジ
 
+### 段階移行（Phase 2）
+
+- **gateway 統一**: 開発入口を `http://localhost` に集約（本番想定）
+- **認証共有**: localStorage キー `admin_token` を legacy / Vue で共用
+- **未移行画面**: customers は legacy のみ。Vue 側から `<a href>` で遷移可能
+- **旧キー移行**: `legacy_token` / `vue_token` は初回読み込み時に `admin_token` へ移行
+
 ### API 境界
 
 - 認証・認可・ページネーション形式を API に集約
 - legacy / vue 双方が同じ `GET /api/admin/orders` を利用
-- CORS で `localhost:5173` と `localhost:8081` を許可
+- CORS で `http://localhost` および開発用直アクセスポートを許可
 
 ## 5. ローカル起動方法
 
@@ -105,11 +118,12 @@ make setup
 
 `make setup` は以下を実行します。
 
-1. `docker compose up -d --build`
+1. DB コンテナ起動
 2. `composer install`（app コンテナ）
 3. `.env` 生成・`APP_KEY` 生成
 4. `migrate` + `db:seed`
-5. `npm install`（frontend コンテナ）
+5. 全サービス起動（gateway 含む）
+6. `npm install`（frontend コンテナ）
 
 ### 日常操作
 
@@ -125,6 +139,26 @@ make bash      # app コンテナに入る
 
 ## 6. 動作確認
 
+### 推奨アクセス（gateway 経由）
+
+| 用途 | URL |
+|------|-----|
+| **推奨入口** | http://localhost |
+| Vue 受注一覧 | http://localhost/orders |
+| legacy 顧客一覧（未移行） | http://localhost/legacy/customers.html |
+| legacy 受注一覧（Before） | http://localhost/legacy/ |
+| API | http://localhost/api/... |
+
+### 開発用直アクセス（比較・デバッグ）
+
+| サービス | URL |
+|---------|-----|
+| API 直接 | http://localhost:8000 |
+| Legacy 直接 | http://localhost:8081 |
+| Vue 直接 | http://localhost:5173 |
+
+※ 直アクセス時は API が `:8000` または gateway `:80` 向きになるため、README の推奨入口（gateway）での確認を優先してください。
+
 ### ログイン情報
 
 | ロール | メール | パスワード |
@@ -134,34 +168,36 @@ make bash      # app コンテナに入る
 
 ※ 受注一覧は **admin のみ** アクセス可能（staff は 403）
 
-### URL
+### 手動確認手順（gateway 経由）
 
-| サービス | URL |
-|---------|-----|
-| API | http://localhost:8000 |
-| Legacy (jQuery) | http://localhost:8081 |
-| Vue 3 SPA | http://localhost:5173 |
+1. `http://localhost/orders` を開き、admin でログイン
+2. ステータスフィルタ・ページネーションが動作すること
+3. ナビから「顧客一覧（Legacy・未移行）」→ `/legacy/customers.html` へ遷移
+4. **再ログインなし** で顧客一覧（ダミーデータ）が表示されること
+5. legacy から「受注一覧（Vue）」→ `/orders` へ戻る
+6. DevTools → Local Storage に `admin_token` が 1 つだけ存在すること
 
-### 確認ポイント
+### 比較確認（Before / After）
 
-1. **Legacy**: ログイン後、ステータスを変更して「検索」→ URL が変わりページがリロードされる
-2. **Vue**: 同じフィルタ操作でページリロードなしに一覧が更新される
-3. **API**: `GET /api/admin/orders` が Laravel 標準 pagination（`data`, `meta`, `links`）を返す
-4. **Seeder**: 55 件の受注データでページネーション（20 件/ページ）が動作する
+1. **Legacy 直**: `http://localhost:8081` — フィルタ変更でページリロード
+2. **Vue gateway**: `http://localhost/orders` — フィルタ変更でリロードなし
+3. **API**: `GET http://localhost/api/admin/orders` が Laravel 標準 pagination を返す
 
 ## 7. ディレクトリ構成
 
 ```
 vue-admin-replace/
 ├── src/                      # Laravel API（Sanctum）
-├── legacy-frontend/          # jQuery 版受注一覧（Before）
+├── legacy-frontend/          # jQuery 版（orders + customers 未移行）
 ├── frontend-vue/             # Vue 3 + Vite + TypeScript SPA（After）
 ├── aidlc-docs/               # 軽量 AI-DLC ドキュメント
-├── docker/                   # Dockerfile, nginx 設定
+├── docker/
+│   ├── gateway/              # gateway nginx 設定
+│   ├── legacy/               # legacy nginx 設定
+│   └── php/                  # Laravel コンテナ
 ├── docker-compose.yml
 ├── Makefile
 ├── README.md
-├── .cursor/environment.json
 └── .gitignore
 ```
 
@@ -172,3 +208,9 @@ vue-admin-replace/
 - 列ソート、カラム表示切替
 - staff ロール向け権限細分化
 - E2E テスト（Playwright）の追加
+
+## 関連ドキュメント
+
+- 移行計画: `aidlc-docs/inception/migration-plan.md`
+- gateway 実装計画: `aidlc-docs/construction/gateway-unified-domain-plan.md`
+- 設計判断: `aidlc-docs/audit.md`
