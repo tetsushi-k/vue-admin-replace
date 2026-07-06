@@ -39,6 +39,11 @@ async function logout() {
       <el-button @click="logout">ログアウト</el-button>
     </header>
 
+    <nav class="nav-links">
+      <span class="nav-current">受注一覧（Vue）</span>
+      <a href="/legacy/customers.html">顧客一覧（Legacy・未移行）</a>
+    </nav>
+
     <OrderFilterBar @search="onSearch" />
 
     <el-alert v-if="store.error" :title="store.error" type="error" show-icon class="mb" />
@@ -65,6 +70,24 @@ async function logout() {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+}
+
+.nav-links {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f0f4f8;
+  border: 1px solid #d0d7de;
+  border-radius: 4px;
+}
+
+.nav-links a {
+  margin-left: 1rem;
+  color: #1565c0;
+  text-decoration: none;
+}
+
+.nav-current {
+  font-weight: bold;
 }
 
 .mb {

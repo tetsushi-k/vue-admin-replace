@@ -2,11 +2,32 @@ import { defineStore } from 'pinia'
 import { fetchOrders, login as apiLogin, logout as apiLogout, setAuthToken } from '../api/client'
 import type { Order, OrderFilters, PaginationMeta } from '../types/order'
 
-const TOKEN_KEY = 'vue_token'
+const TOKEN_KEY = 'admin_token'
+const LEGACY_TOKEN_KEYS = ['vue_token', 'legacy_token']
+
+function migrateToken(): string | null {
+  const existing = localStorage.getItem(TOKEN_KEY)
+  if (existing) {
+    return existing
+  }
+  for (const key of LEGACY_TOKEN_KEYS) {
+    const token = localStorage.getItem(key)
+    if (token) {
+      localStorage.setItem(TOKEN_KEY, token)
+      localStorage.removeItem(key)
+      return token
+    }
+  }
+  return null
+}
+
+function readStoredToken(): string | null {
+  return migrateToken()
+}
 
 export const useOrderStore = defineStore('orders', {
   state: () => ({
-    token: localStorage.getItem(TOKEN_KEY) as string | null,
+    token: readStoredToken(),
     orders: [] as Order[],
     meta: null as PaginationMeta | null,
     filters: {
@@ -18,7 +39,7 @@ export const useOrderStore = defineStore('orders', {
     } as OrderFilters,
     loading: false,
     error: '' as string,
-    authenticated: !!localStorage.getItem(TOKEN_KEY),
+    authenticated: !!readStoredToken(),
   }),
 
   getters: {
@@ -38,6 +59,9 @@ export const useOrderStore = defineStore('orders', {
       this.token = data.token
       this.authenticated = true
       localStorage.setItem(TOKEN_KEY, data.token)
+      for (const key of LEGACY_TOKEN_KEYS) {
+        localStorage.removeItem(key)
+      }
       setAuthToken(data.token)
     },
 
@@ -54,6 +78,9 @@ export const useOrderStore = defineStore('orders', {
       this.orders = []
       this.meta = null
       localStorage.removeItem(TOKEN_KEY)
+      for (const key of LEGACY_TOKEN_KEYS) {
+        localStorage.removeItem(key)
+      }
       setAuthToken(null)
     },
 
