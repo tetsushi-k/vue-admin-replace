@@ -100,8 +100,8 @@ make test
 
 ## 完了条件
 
-- [ ] `http://localhost` で Vue / legacy / API に到達
-- [ ] `/orders` ↔ `/legacy/customers.html` 相互遷移
-- [ ] `admin_token` 統一・旧キー移行
-- [ ] `make test` 成功
-- [ ] aidlc-docs / README と実装一致
+- [x] `http://localhost` で Vue / legacy / API に到達
+- [x] `/orders` ↔ `/legacy/customers.html` 相互遷移
+- [x] `admin_token` 統一・旧キー移行
+- [x] `make test` 成功
+- [x] aidlc-docs / README と実装一致

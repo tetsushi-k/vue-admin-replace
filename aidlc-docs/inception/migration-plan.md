@@ -56,8 +56,8 @@ EC 受注管理画面は長年 jQuery で運用されてきた。UI 改修のた
 
 ### Phase 2（gateway 統一）
 
-- [ ] `http://localhost` から Vue / legacy / API に到達できる
-- [ ] `/orders`（Vue）と `/legacy/customers.html`（legacy）を相互遷移できる
-- [ ] `admin_token` で legacy ↔ Vue のログイン状態が共有される
-- [ ] legacy orders（Before 比較）は維持、customers は legacy のみ
-- [ ] `make test` 成功、aidlc-docs / README と実装が一致
+- [x] `http://localhost` から Vue / legacy / API に到達できる
+- [x] `/orders`（Vue）と `/legacy/customers.html`（legacy）を相互遷移できる
+- [x] `admin_token` で legacy ↔ Vue のログイン状態が共有される
+- [x] legacy orders（Before 比較）は維持、customers は legacy のみ
+- [x] `make test` 成功、aidlc-docs / README と実装が一致
