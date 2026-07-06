@@ -1,16 +1,17 @@
 (function () {
-  var API_BASE_URL = window.API_BASE_URL || 'http://localhost:8000';
+  var API_BASE_URL = window.LegacyAuth.resolveApiBaseUrl();
 
   function getToken() {
-    return localStorage.getItem('legacy_token');
+    window.LegacyAuth.migrateToken();
+    return window.LegacyAuth.getToken();
   }
 
   function setToken(token) {
-    localStorage.setItem('legacy_token', token);
+    window.LegacyAuth.setToken(token);
   }
 
   function clearToken() {
-    localStorage.removeItem('legacy_token');
+    window.LegacyAuth.clearToken();
   }
 
   function getQueryParams() {

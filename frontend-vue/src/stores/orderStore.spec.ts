@@ -63,4 +63,15 @@ describe('orderStore', () => {
     expect(store.error).toBe('受注一覧の取得に失敗しました')
     expect(store.orders).toEqual([])
   })
+
+  it('migrates legacy vue_token to admin_token', () => {
+    localStorage.setItem('vue_token', 'migrated-token')
+
+    const store = useOrderStore()
+
+    expect(store.token).toBe('migrated-token')
+    expect(localStorage.getItem('admin_token')).toBe('migrated-token')
+    expect(localStorage.getItem('vue_token')).toBeNull()
+    expect(store.authenticated).toBe(true)
+  })
 })

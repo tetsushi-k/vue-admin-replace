@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>顧客一覧（Legacy jQuery）</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+  <div id="login-view" class="container">
+    <h1>ログイン（Legacy）</h1>
+    <form id="login-form">
+      <label>メール <input type="email" id="email" value="admin@example.com" required></label>
+      <label>パスワード <input type="password" id="password" value="password123" required></label>
+      <button type="submit">ログイン</button>
+    </form>
+    <p id="login-error" class="error"></p>
+  </div>
+
+  <div id="customers-view" class="container hidden">
+    <header>
+      <h1>顧客一覧（Legacy jQuery）</h1>
+      <button id="logout-btn" type="button">ログアウト</button>
+    </header>
+
+    <nav class="nav-links">
+      <span class="nav-current">顧客一覧（Legacy・未移行）</span>
+      <a href="index.html">受注一覧（Legacy）</a>
+      <a href="/orders">受注一覧（Vue）</a>
+    </nav>
+
+    <p class="notice">この画面は段階移行デモ用の未移行画面です（ダミーデータ）。</p>
+
+    <table id="customers-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>顧客名</th>
+          <th>メール</th>
+          <th>会員ランク</th>
+        </tr>
+      </thead>
+      <tbody id="customers-body"></tbody>
+    </table>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/customers.js"></script>
+</body>
+</html>
