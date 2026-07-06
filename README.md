@@ -77,7 +77,7 @@ sequenceDiagram
 
 ### Vue 版の改善
 
-- **コンポーネント分割**: `OrderFilterBar` / `OrderTable` / `OrderPagination`
+- **コンポーネント分割**: `OrderFilterBar` / `OrderTable` / `OrderPagination` / `OrderDetailModal`
 - **Pinia**: 検索条件・一覧・loading / error を一元管理
 - **リロードなし**: フィルタ変更 → `applyFilters()` → API 再取得
 - **UX**: `v-loading`、0 件時の `el-empty`、ステータスバッジ
@@ -148,6 +148,7 @@ make bash      # app コンテナに入る
 2. **Vue**: 同じフィルタ操作でページリロードなしに一覧が更新される
 3. **API**: `GET /api/admin/orders` が Laravel 標準 pagination（`data`, `meta`, `links`）を返す
 4. **Seeder**: 55 件の受注データでページネーション（20 件/ページ）が動作する
+5. **Vue 詳細モーダル**: 受注一覧の行をクリック → 詳細モーダルが開き、一覧と同じ項目が表示される。× ボタンまたは背景クリックで閉じられる
 
 ## 7. ディレクトリ構成
 
@@ -167,7 +168,6 @@ vue-admin-replace/
 
 ## 8. 今後の拡張案
 
-- 受注詳細モーダル・編集画面の Vue 化
 - CSV エクスポート、一括ステータス更新
 - 列ソート、カラム表示切替
 - staff ロール向け権限細分化

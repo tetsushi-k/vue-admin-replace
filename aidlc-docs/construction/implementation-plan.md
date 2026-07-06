@@ -54,7 +54,8 @@
 
 - `OrderFilterBar.spec.ts`: emit / store 更新
 - `orderStore.spec.ts`: API モック、loading 状態
-- `OrderTable.spec.ts`: 行表示、空状態
+- `OrderTable.spec.ts`: 行表示、空状態、行クリック emit
+- `OrderDetailModal.spec.ts`: 表示項目、モーダル閉じる
 
 ## 完了確認
 

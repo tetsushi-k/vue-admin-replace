@@ -11,7 +11,9 @@
 | PA-05 | legacy フィルタ | フルリロード維持 | AJAX 化 | Before 比較のため意図的アンチパターンを残す | Proxy |
 | PA-06 | DB（本番想定） | MySQL 8.0 | PostgreSQL | Docker 標準構成、Laravel デフォルト親和性 | Proxy |
 | PA-07 | テスト DB | SQLite in-memory（PHPUnit） | MySQL テストコンテナ | 高速・CI 向き | Proxy |
+| PA-08 | 詳細モーダルのデータ源 | 一覧 API の行データ | 詳細 API 追加 | API 境界固定を維持、Phase 2 はフロントのみ | Proxy |
 
 ## レビュー日
 
 - 2026-07-02: Phase 1 初回実装完了時に記録
+- 2026-07-06: Phase 2 詳細モーダル着手時に PA-08 を記録

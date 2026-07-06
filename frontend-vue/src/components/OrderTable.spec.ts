@@ -26,7 +26,8 @@ describe('OrderTable', () => {
         stubs: {
           ElTable: {
             props: ['data'],
-            template: '<div class="table"><div v-for="row in data" :key="row.id">{{ row.customer_name }} {{ row.status }}</div></div>',
+            emits: ['row-click'],
+            template: '<div class="table"><div v-for="row in data" :key="row.id" class="row" @click="$emit(\'row-click\', row)">{{ row.customer_name }} {{ row.status }}</div></div>',
           },
           ElTableColumn: true,
           ElTag: { template: '<span><slot /></span>' },
@@ -57,5 +58,31 @@ describe('OrderTable', () => {
     })
 
     expect(wrapper.text()).toContain('受注データがありません')
+  })
+
+  it('emits row-click when a row is clicked', async () => {
+    const wrapper = mount(OrderTable, {
+      props: {
+        orders: sampleOrders,
+        loading: false,
+        empty: false,
+      },
+      global: {
+        stubs: {
+          ElTable: {
+            props: ['data'],
+            emits: ['row-click'],
+            template: '<div class="table"><div v-for="row in data" :key="row.id" class="row" @click="$emit(\'row-click\', row)">{{ row.customer_name }}</div></div>',
+          },
+          ElTableColumn: true,
+          ElTag: true,
+          ElEmpty: true,
+        },
+      },
+    })
+
+    await wrapper.find('.row').trigger('click')
+
+    expect(wrapper.emitted('row-click')).toEqual([[sampleOrders[0]]])
   })
 })

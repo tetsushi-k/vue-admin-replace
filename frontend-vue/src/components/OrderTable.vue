@@ -7,6 +7,10 @@ defineProps<{
   empty: boolean
 }>()
 
+const emit = defineEmits<{
+  'row-click': [order: Order]
+}>()
+
 const statusType = (status: Order['status']) => {
   const map = {
     pending: 'warning',
@@ -23,7 +27,7 @@ const formatAmount = (amount: number) => `¥${amount.toLocaleString()}`
 <template>
   <div v-loading="loading" class="order-table-wrap">
     <el-empty v-if="empty" description="受注データがありません" />
-    <el-table v-else :data="orders" stripe style="width: 100%">
+    <el-table v-else :data="orders" stripe style="width: 100%" @row-click="(row: Order) => emit('row-click', row)">
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="customer_name" label="顧客名" min-width="160" />
       <el-table-column label="金額" min-width="120">
