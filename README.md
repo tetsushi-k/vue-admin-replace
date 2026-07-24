@@ -4,6 +4,8 @@ https://github.com/tetsushi-k/vue-admin-replace
 
 EC 受注管理画面の **jQuery → Vue 3 段階リプレイス** を題材にしたポートフォリオです。同一 Laravel API に対して legacy（jQuery）と Vue 3 を並行稼働させ、Before / After の差分を比較できます。Phase 2 では gateway nginx により **本番想定の 1 ドメイン運用** を開発環境でも再現します。
 
+ポートフォリオ上の位置: **段階リプレイス** の実務例。プロフィール全体は [tetsushi-k](https://github.com/tetsushi-k)。
+
 ## 1. 概要
 
 長年 jQuery で運用されてきた受注一覧画面を、API 境界を固定したまま Vue 3 + Element Plus へ段階移行する構成です。
